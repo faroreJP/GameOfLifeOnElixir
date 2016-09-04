@@ -1,40 +1,60 @@
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Faore, Sep 4, 2016
+# Module for Game of Life
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 defmodule LifeGame do
+
+  #-------------------------------------------------------------
+  # Public Usage
+  #-------------------------------------------------------------
+
+  # Make Map
   def make_map(lifemap) do
     make_map(lifemap, lifemap[:w] * lifemap[:h])
   end
 
-  def make_map(life, 1) do
+  # Update Map
+  def update(life) do
+    IO.gets ""
+
+    update_cell(life, life, life[:w] * life[:h])
+    |> print_map()
+    |> update()
+  end
+
+  # Print Map
+  def print_map(life) do
+    print_map(life, life[:w] * life[:h])
+    life
+  end
+
+  #-------------------------------------------------------------
+  # Private Functions
+  #-------------------------------------------------------------
+
+  defp make_map(life, 1) do
     Map.put(life, 1, false)
   end
-  def make_map(life, n) do
+  defp make_map(life, n) do
     make_map(life, n - 1)
     |> Map.put(n, false)
   end
 
-
-  def update(life) do
-    IO.gets ""
-
-    updatedmap = update_cell(life, life, life[:w] * life[:h])
-    print_map(updatedmap)
-    update(updatedmap)
-  end
-
-  def update_cell(life, prelife, 1) do
+  defp update_cell(life, prelife, 1) do
     count = count_live(prelife, 1)
 
     judge({count, prelife[1]})
     |> put_cell(life, 1)
   end
-  def update_cell(life, prelife, index) do
+  defp update_cell(life, prelife, index) do
     lifemap = update_cell(life, prelife, index - 1)
+    count   = count_live(prelife, index)
 
-    count = count_live(prelife, index)
     judge({count, lifemap[index]})
     |> put_cell(lifemap, index)
   end
 
-  def count_live(life, index) do
+  defp count_live(life, index) do
     cond do
       rem(index, life[:w]) == 0 -> 
         check(0, life[index - life[:w] - 1])
@@ -60,17 +80,17 @@ defmodule LifeGame do
     end
   end
 
-  def check(count, nil) do
+  defp check(count, nil) do
     count
   end
-  def check(count, true) do
+  defp check(count, true) do
     count + 1
   end
-  def check(count, false) do
+  defp check(count, false) do
     count
   end
 
-  def judge({count, state}) do
+  defp judge({count, state}) do
     case {count, state} do
       {3, false} -> true 
       {0, true} -> false
@@ -81,16 +101,10 @@ defmodule LifeGame do
     end
   end
 
-
-  def print_map(life) do
-    print_map(life, life[:w] * life[:h])
-    life
-  end
-
-  def print_map(life, 1) do
+  defp print_map(life, 1) do
     print_cell(life[1])
   end
-  def print_map(life, n) do
+  defp print_map(life, n) do
     print_map(life, n - 1)
 
     print_cell(life[n])
@@ -99,10 +113,10 @@ defmodule LifeGame do
     end
   end
 
-  def put_cell(state, life, index) do
+  defp put_cell(state, life, index) do
     Map.put(life, index, state)
   end
-  def print_cell(cell) do
+  defp print_cell(cell) do
     case cell do
       true -> IO.write("x ")
       false -> IO.write("  ")
@@ -110,11 +124,13 @@ defmodule LifeGame do
   end
 end
 
-LifeGame.make_map(%{:w => 40, :h => 40})
+#-------------------------------------------------------------
+# Entry Point
+#-------------------------------------------------------------
+LifeGame.make_map(%{w: 40, h: 40})
 
-#
+#-------------------------------------------------------------
 #  Galaxy
-#
 |> Map.put(20 + 40 * 20, true)
 |> Map.put(21 + 40 * 20, true)
 |> Map.put(22 + 40 * 20, true)
@@ -164,18 +180,16 @@ LifeGame.make_map(%{:w => 40, :h => 40})
 |> Map.put(27 + 40 * 28, true)
 |> Map.put(28 + 40 * 28, true)
 
-#
+#-------------------------------------------------------------
 # Glider
-#
 # |> Map.put(40 * 50 - 1, true)
 # |> Map.put(40 * 49 - 2, true)
 # |> Map.put(40 * 48, true)
 # |> Map.put(40 * 48 - 1, true)
 # |> Map.put(40 * 48 - 2, true)
 
-#
+#-------------------------------------------------------------
 # Die Hard
-#
 # |> Map.put(28 + 40 * 20, true) 
 # |> Map.put(22 + 40 * 21, true) 
 # |> Map.put(23 + 40 * 21, true) 
@@ -184,5 +198,7 @@ LifeGame.make_map(%{:w => 40, :h => 40})
 # |> Map.put(28 + 40 * 22, true) 
 # |> Map.put(29 + 40 * 22, true) 
 
+#-------------------------------------------------------------
+# Main Loop
 |> LifeGame.print_map()
 |> LifeGame.update()
